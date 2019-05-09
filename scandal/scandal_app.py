@@ -6,6 +6,6 @@ app = Flask(__name__)
 def index():
     return render_template('layout.html')
 
-@app.route('/visualize', methods=['GET', 'POST'])
+@app.route('/visualization', methods=['GET', 'POST'])
 def visualize():
     return render_template('visualization.html')
