@@ -36,8 +36,6 @@ class user_node:
         if tweet.kind == "Retweet":
             self.num_retweets += 1
 
-
-
 class tweet:
     def __init__(self, kind, sentiment, content):
         self.kind = kind
@@ -46,11 +44,6 @@ class tweet:
 
 #A function to normalize the edge weights between 0-1
 def normalize(edge):
-    return None
-
-#We need to find out seeds to begin the graph
-#Maybe start with the post prolific posters
-def get_seeds():
     return None
 
 #Go through all the tweets in the dataset and create nodes for all users
@@ -77,7 +70,6 @@ def create_user_nodes():
                     new_user.update_info(new_tweet)
                     #print(new_user.name)
                     users[row[4]] = new_user
-                    print(users[row[4]])
     return users
 
 def create_edges():
@@ -89,7 +81,7 @@ def get_sentiment(fields, row):
     for s in row[20:]:
         if float(s) > 0:
             sentiment[fields[count]] = float(s)
-            count += 1
+        count += 1
     return sentiment 
 
 def print_users(users):
@@ -97,6 +89,12 @@ def print_users(users):
         print("Name: ", user.name)
         print("    Location: ", user.location)
         print("    Tweets: ", user.num_tweets)
+        print_tweets(user.my_tweets)
+
+def print_tweets(tweets):
+    for tweet in tweets:
+        print("    Tweet: ", tweet.content)
+        print("    Sentiment: ", tweet.sentiment)
 
 users = create_user_nodes()
 print_users(users)
