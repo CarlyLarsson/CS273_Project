@@ -5,15 +5,35 @@ import sys
 import os
 import numpy as np
 import pandas as pd
+from py2neo import Graph, Node, Relationship, NodeMatcher
+# from py2neo.data import Node, Relationship
 
+
+uri = "bolt://localhost:7687"
+user = "neo4j"
+password = "spring2019"
+
+graph = Graph(uri=uri, user=user, password=password)
+matcher = NodeMatcher(graph)
+# optionally clear the graph
+# graph.delete_all()
+
+# print(len(g.nodes))
+# print(len(g.relationships))
+
+#https://py2neo.org/2.0/intro.html
 #Every edge knows its original poster user and its repost destination user
 #The reposts and the number fo comments will influence the weight of the edge
-class edge:
-    def __init__(self, origin_user, repost_user, comment_user):
-        self.origin = origin_user
-        self.repost = repost_user
-        self.comments = comment_user
-        self.weight = 0
+# class edge:
+#     def __init__(self, from_user, to_user):
+#         self.from_user = origin_user
+#         self.to_user = repost_user
+#         self.weight = 0
+
+#For every tweet there is an edge:
+    #For a original tweet it is a loop back to the author
+    #For a retweet it is an edge from the reposter to the original author
+    #For a reply it would be an edge from the author of the reply to the author of the originl post
 
 class user_node: 
     def __init__(self, author, name, location):
@@ -22,19 +42,26 @@ class user_node:
         self.location = location
 
         self.my_tweets = []
-        self.my_edges = []
+        self.my_replies = []
+        self.my_retweets = []
+
+        self.outgoing = 0
+        self.incoming = 0
         self.num_tweets = 0
         self.num_retweets = 0
         self.num_replies = 0 
 
     def update_info(self, tweet):
-        if tweet.kind == "Tweet":
-            self.num_tweets += 1
-            self.my_tweets.append(tweet)
-        if tweet.kind == "Reply":
-            self.num_replies += 1
-        if tweet.kind == "Retweet":
-            self.num_retweets += 1
+        if tweet != None:
+            if tweet.kind == "Tweet":
+                self.num_tweets += 1
+                self.my_tweets.append(tweet)
+            if tweet.kind == "Reply":
+                self.num_replies += 1
+                self.my_replies.append(tweet)
+            if tweet.kind == "Retweet":
+                self.num_retweets += 1
+                self.my_retweets.append(tweet)
 
 class tweet:
     def __init__(self, kind, sentiment, content):
@@ -66,14 +93,125 @@ def create_user_nodes():
 
                 else:
                     #Setting the location is not going to be as easy as this in actuality
+                    #author, name, location
                     new_user = user_node(row[4], row[5], (row[6]+" "+row[7]+" "+row[8]))
                     new_user.update_info(new_tweet)
                     #print(new_user.name)
                     users[row[4]] = new_user
     return users
 
-def create_edges():
+
+#Graph stuff
+def create_user_node_in_graph(users):
+    graph.delete_all()
+    #https://stackoverflow.com/questions/51796919/py2neo-cannot-create-graph
+    # https://py2neo.org/2.0/essentials.html#py2neo.Graph.create
+    for user in users.values():  
+        user_node_in_graph = Node("User", 
+                                        author=user.author,
+                                        name=user.name, 
+                                        location=user.location, 
+                                        orig_tweet_count=user.num_tweets,
+                                        retweet_count=user.num_retweets,
+                                        reply_count=user.num_replies)
+        graph.create(user_node_in_graph)
+        # tx.commit()
+    return (len(graph.nodes))
+
+
+def node_exists_in_graph(lbl, username):
+    matcher = NodeMatcher(graph)
+    # matcher.match("Person", name="Keanu Reeves").first()
+    m = matcher.match(lbl, author = username).first()
+    if m is None:
+        return None
+    else:
+        # print(m)
+        return m
+
+def find_node_csv(author):
+    for user in users.values():
+        if user.author == author:
+            return user
     return None
+
+def create_single_csv_node(author, tweet):
+    new_user = user_node(author, None, None)
+    new_user.update_info(tweet)
+    return new_user
+
+def create_retweet_relations(users):
+    for user in users.values():
+        if user.num_retweets > 0: 
+            for retweet in user.my_retweets:
+                #Get name of original author 
+                sp_tweet = (retweet.content.replace('b\'','')).split()
+                author = sp_tweet[1]
+                author_node = find_node_csv(author)
+                
+
+                if author_node == None:
+                    new_tweet = tweet("Tweet", retweet.sentiment, retweet.content)
+                    author_node = create_single_csv_node(author, new_tweet)
+
+                userB = node_exists_in_graph("User", author_node.author) 
+                userA = node_exists_in_graph("User", user.author)
+
+                if userB == None:
+                    user_node_in_graph = Node("User", 
+                                    author=author,
+                                    name='', 
+                                    location='', 
+                                    orig_tweet_count='',
+                                    retweet_count='1',
+                                    reply_count='')
+
+                    graph.create(user_node_in_graph)
+                    userB = node_exists_in_graph("User", author_node.author)
+                print("creating retweet relationship")
+                userA_retweets_userB = Relationship(userA, "RETWEETED", userB)
+                graph.create(userA_retweets_userB)
+
+def create_reply_relations(users):
+    for user in users.values():
+        for reply in user.my_replies:
+            replied_to_user = (reply.content.replace('b\'','')).split(" ")[0]
+            #want to replace those with a period
+            if "." in replied_to_user:
+                replied_to_user.replace(".","")
+            #if replied_to_user not in database, add the user
+            if node_exists_in_graph('User', replied_to_user) == None:
+                user_node_in_graph = Node("User", 
+                                    author=replied_to_user,
+                                    name='', 
+                                    location='', 
+                                    orig_tweet_count='',
+                                    retweet_count='',
+                                    reply_count='')
+
+                graph.create(user_node_in_graph)
+            if node_exists_in_graph('User', replied_to_user) != None:
+                hi = Node("User", 
+                                author=replied_to_user.replace('b\'',''),
+                                name='', 
+                                location='', 
+                                orig_tweet_count='',
+                                retweet_count='',
+                                reply_count='')
+                print(hi)
+
+#                 (:User {author: "b'@thaddomina", location: '', name: '', orig_tweet_count: '', reply_count: '', retweet_count: ''})
+#                 (_5311:User {author: '@laurel_sweet', location: '', name: '', orig_tweet_count: '', reply_count: '', retweet_count: '1'})
+# creating retweet relationship
+            
+            #if replied_to_user is not in csv original list, add user
+            if replied_to_user not in users:
+                new_tweet = tweet(None, None, None)
+                create_single_csv_node(replied_to_user,new_tweet)          
+            
+            print("creating reply relationship")
+            userA_replied_to_userB = Relationship(node_exists_in_graph('User', user.author) , "REPLIED_TO", node_exists_in_graph('User', replied_to_user))
+            graph.create(userA_replied_to_userB)
 
 def get_sentiment(fields, row):
     sentiment = {}
@@ -97,9 +235,9 @@ def print_tweets(tweets):
         print("    Sentiment: ", tweet.sentiment)
 
 users = create_user_nodes()
-print_users(users)
-                    
-
+# create_user_node_in_graph(users)
+create_reply_relations(users)
+create_retweet_relations(users)
 
                 
     
