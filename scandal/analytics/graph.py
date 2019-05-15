@@ -82,7 +82,7 @@ def normalize(edge):
 #Tweets can be "Tweet", "Reply", "Retweet" in column 17
 def create_user_nodes():
     users = {}
-    for file in glob(str(sys.argv[1])+"/*.tsv"):
+    for file in glob(str(sys.argv[1])+"/*/*.tsv"):
         with open(file, 'rU') as f:
             tsvreader = csv.reader(f, delimiter='\t') 
             fields = next(tsvreader)
