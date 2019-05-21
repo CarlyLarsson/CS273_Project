@@ -83,6 +83,7 @@ def normalize(edge):
 def create_user_nodes():
     users = {}
     for file in glob(str(sys.argv[1])+"/*/*.tsv"):
+        print(file)
         with open(file, 'rU') as f:
             tsvreader = csv.reader(f, delimiter='\t') 
             fields = next(tsvreader)
@@ -99,7 +100,7 @@ def create_user_nodes():
                 else:
                     #Setting the location is not going to be as easy as this in actuality
                     #author, name, location
-                    new_user = user_node(row[4], row[5], (row[6]+" "+row[7]+" "+row[8]))
+                    new_user = user_node(row[4], row[5], (row[8]+","+row[7]+","+row[6]))
                     new_user.update_info(new_tweet)
                     #print(new_user.name)
                     users[row[4]] = new_user
@@ -151,7 +152,7 @@ def create_retweet_relations(users):
         if user.num_retweets > 0: 
             for retweet in user.my_retweets:
                 #Get name of original author 
-                sp_tweet = ((retweet.content.replace('b\'','')).strip('\'')).split()
+                sp_tweet = ((retweet.content.replace('b\'','').replace('b\"','')).strip('\'').strip('\"')).split()
                 author = sp_tweet[1]
                 author_node = find_node_csv(author)
                 
@@ -182,7 +183,7 @@ def create_retweet_relations(users):
 def create_reply_relations(users):
     for user in users.values():
         for reply in user.my_replies:
-            replied_to_user = ((reply.content.replace('b\'','')).strip('\'')).split(" ")[0]
+            replied_to_user = ((reply.content.replace('b\'','').replace('b\"','')).strip('\'').strip('\"')).split(" ")[0]
             #want to replace those with a period
             if "." in replied_to_user:
                 replied_to_user.replace(".","")
@@ -212,7 +213,7 @@ def create_reply_relations(users):
 def create_mention_relations(users):
     for user in users.values():
         for tweet_ in user.my_potential_mentions:
-            mentions = ['@'+re.sub(r'[^\w\s]','',i) for i in ((tweet_.content.replace('b\'','')).strip('\'')).split(" ") if "@" in i][1:]
+            mentions = ['@'+re.sub(r'[^\w\s]','',i) for i in ((tweet_.content.replace('b\'','').replace('b\"','')).strip('\'').strip('\"')).split(" ") if "@" in i][1:]
             # print(mentions)
             # #want to replace those with a period
             # if "." in replied_to_user:
