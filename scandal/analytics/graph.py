@@ -190,19 +190,7 @@ def create_reply_relations(users):
                                     reply_count='')
 
                 graph.create(user_node_in_graph)
-            if node_exists_in_graph('User', replied_to_user) != None:
-                hi = Node("User", 
-                                author=replied_to_user.replace('b\'',''),
-                                name='', 
-                                location='', 
-                                orig_tweet_count='',
-                                retweet_count='',
-                                reply_count='')
-                print(hi)
 
-#                 (:User {author: "b'@thaddomina", location: '', name: '', orig_tweet_count: '', reply_count: '', retweet_count: ''})
-#                 (_5311:User {author: '@laurel_sweet', location: '', name: '', orig_tweet_count: '', reply_count: '', retweet_count: '1'})
-# creating retweet relationship
             
             #if replied_to_user is not in csv original list, add user
             if replied_to_user not in users:
@@ -238,11 +226,6 @@ users = create_user_nodes()
 # create_user_node_in_graph(users)
 create_reply_relations(users)
 create_retweet_relations(users)
-
-                
-    
-
-
 
 
 

@@ -53,6 +53,7 @@ def totaling_a_folder():
     track = pd.Series((totaling/float(total_tweets)), fields)
     final = track.sort_values(ascending=False)[:50]
     print(final)
+    return final
 
 
 totaling_a_folder()
