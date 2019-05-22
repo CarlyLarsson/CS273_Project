@@ -109,7 +109,7 @@ def create_user_nodes():
 
 #Graph stuff
 def create_user_node_in_graph(users):
-    graph.delete_all()
+    #graph.delete_all()
     #https://stackoverflow.com/questions/51796919/py2neo-cannot-create-graph
     # https://py2neo.org/2.0/essentials.html#py2neo.Graph.create
     for user in users.values():  
@@ -199,7 +199,7 @@ def create_reply_relations(users):
                                     mention_count=0)
 
                 graph.create(user_node_in_graph)
-                
+
             #if replied_to_user is not in csv original list, add user
             if replied_to_user not in users:
                 new_tweet = tweet(None, None, None)
@@ -272,11 +272,11 @@ def print_tweets(tweets):
         print("    Tweet: ", tweet.content)
         print("    Sentiment: ", tweet.sentiment)
 
-users = create_user_nodes()
-create_user_node_in_graph(users)
-create_reply_relations(users)
-create_retweet_relations(users)
-create_mention_relations(users)
+# users = create_user_nodes()
+# create_user_node_in_graph(users)
+# create_reply_relations(users)
+# create_retweet_relations(users)
+# create_mention_relations(users)
 
 
 
