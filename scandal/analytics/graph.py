@@ -183,7 +183,7 @@ def create_retweet_relations(users):
                     graph.create(user_node_in_graph)
                     userB = node_exists_in_graph("User", author_node.author)
                 print("creating retweet relationship")
-                userA_retweets_userB = Relationship(userA, "RETWEETED", userB, {'datetime': retweet.dt.strftime("%m/%d/%Y, %H:%M:%S")})
+                userA_retweets_userB = Relationship(userA, "RETWEETED", userB, properties={'datetime': retweet.dt.strftime("%m/%d/%Y, %H:%M:%S")})
                 graph.create(userA_retweets_userB)
 
 def create_reply_relations(users):
@@ -212,7 +212,7 @@ def create_reply_relations(users):
                 create_single_csv_node(replied_to_user,new_tweet)          
             
             print("creating reply relationship")
-            userA_replied_to_userB = Relationship(node_exists_in_graph('User', user.author), "REPLIED_TO", node_exists_in_graph('User', replied_to_user), {'datetime': reply.dt.strftime("%m/%d/%Y, %H:%M:%S")})
+            userA_replied_to_userB = Relationship(node_exists_in_graph('User', user.author), "REPLIED_TO", node_exists_in_graph('User', replied_to_user), properties={'datetime': reply.dt.strftime("%m/%d/%Y, %H:%M:%S")})
             graph.create(userA_replied_to_userB)
 
 def create_mention_relations(users):
@@ -253,7 +253,7 @@ def create_mention_relations(users):
 
 
                 print("creating mention relationship")
-                userA_mentioned_userB = Relationship(node_exists_in_graph('User', user.author) , "MENTIONED", node_exists_in_graph('User', mention), {'datetime': tweet_.dt.strftime("%m/%d/%Y, %H:%M:%S")})
+                userA_mentioned_userB = Relationship(node_exists_in_graph('User', user.author) , "MENTIONED", node_exists_in_graph('User', mention), properties={'datetime': tweet_.dt.strftime("%m/%d/%Y, %H:%M:%S")})
                 graph.create(userA_mentioned_userB)
 
 
