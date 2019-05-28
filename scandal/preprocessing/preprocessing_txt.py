@@ -3,13 +3,13 @@ import json
 import glob
 import sys
 import re, string, unicodedata
-import nltk
+# import nltk
 import contractions
 import inflect
 # from bs4 import BeautifulSoup
-from nltk import word_tokenize, sent_tokenize
-from nltk.corpus import stopwords
-from nltk.stem import LancasterStemmer, WordNetLemmatizer
+# from nltk import word_tokenize, sent_tokenize
+# from nltk.corpus import stopwords
+# from nltk.stem import LancasterStemmer, WordNetLemmatizer
 import os
 import csv
 
@@ -39,18 +39,23 @@ def remove_non_ascii(words):
 
 
 #split the files into respective folders
-os.mkdir("/Users/Dana/Downloads/CS273_Project/scandal/postprocessing/")
+# os.mkdir("/Users/Dana/Downloads/CS273_Project/scandal/postprocessing/")
 for folder in glob.glob(str(sys.argv[1])+"/*"):
-    postprocess_folder = "/Users/Dana/Downloads/CS273_Project/scandal/postprocessing/" + os.path.splitext(os.path.basename(folder))[0] + "/"
-    os.mkdir(postprocess_folder)
+    try:
+        postprocess_folder = "/Users/dananguyen/Google Drive/Documents/coursework/CS273_Project/scandal/postprocessing/" + os.path.splitext(os.path.basename(folder))[0] + "/"
+        os.mkdir(postprocess_folder)
+    except Exception as e:
+        print(e)
+        continue
 
     for file in glob.glob(folder+"/*.tsv"):
         file_name = (os.path.splitext(os.path.basename(file))[0])
         print(file_name)
         print(postprocess_folder+file_name)
-        with open(file, "rU",encoding="utf-8") as inputf, open((postprocess_folder+file_name+"_processed.tsv"), "a", encoding='utf-8') as outputf:
+        with open(file, "rU") as inputf, open((postprocess_folder+file_name+"_processed.tsv"), "a", encoding='utf-8') as outputf:
         # with open(file, "rU",encoding="utf-8") as inputf:
-        
+            # for line in inputf:
+            #     print(line.decode(errors='ignore'))
             # print(inputf)
             reader = csv.reader(inputf, delimiter="\t")
             writer = csv.writer(outputf, delimiter = "\t")
@@ -60,7 +65,7 @@ for folder in glob.glob(str(sys.argv[1])+"/*"):
             # print(header)
             for line in reader:
                 try:
-                    loaded_data = line[3].encode("utf-8", errors="ignore")
+                    loaded_data = line[3].encode("utf-8", errors="ignore").strip()
                     tweet_text = (loaded_data).strip().decode('utf-8', 'ignore')
                     # tweet_text = tweet_text.encode('utf-8')
                     tweet_text = replace_contractions(tweet_text).lower()
@@ -78,7 +83,7 @@ for folder in glob.glob(str(sys.argv[1])+"/*"):
                 except Exception as e:
                     print(e)
 
-                    with open("/Users/Dana/Downloads/CS273_Project/scandal/preprocessing/errors.txt", "a") as errorf:
+                    with open("/Users/dananguyen/Google Drive/Documents/coursework/CS273_Project/scandal/preprocessing/errors_may27.txt", "a") as errorf:
                         errorf.write(file_name + "   " + str(e)+"\n")
                     # try:
                     #     print(loaded_data["error"])
