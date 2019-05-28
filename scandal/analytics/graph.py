@@ -42,6 +42,9 @@ class user_node:
         self.name = name 
         self.location = location
 
+        self.latitude = []
+        self.longitude = []
+
         self.my_tweets = []
         self.my_replies = []
         self.my_retweets = []
@@ -273,11 +276,11 @@ def print_tweets(tweets):
         print("    Tweet: ", tweet.content)
         print("    Sentiment: ", tweet.sentiment)
 
-users = create_user_nodes()
-create_user_node_in_graph(users)
-create_reply_relations(users)
-create_retweet_relations(users)
-create_mention_relations(users)
+# users = create_user_nodes()
+# create_user_node_in_graph(users)
+# create_reply_relations(users)
+# create_retweet_relations(users)
+# create_mention_relations(users)
 
                 
     
