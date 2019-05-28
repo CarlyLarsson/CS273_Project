@@ -17,7 +17,7 @@ password = "spring2019"
 graph = Graph(uri=uri, user=user, password=password)
 matcher = NodeMatcher(graph)
 # optionally clear the graph
-# graph.delete_all()
+graph.delete_all()
 
 # print(len(g.nodes))
 # print(len(g.relationships))
@@ -182,8 +182,9 @@ def create_retweet_relations(users):
                     graph.create(user_node_in_graph)
                     userB = node_exists_in_graph("User", author_node.author)
                 print("creating retweet relationship")
-                dt = retweet.dt.strftime("%m/%d/%Y, %H:%M:%S")
-                userA_retweets_userB = Relationship(userA, "RETWEETED", userB, properties={'datetime': dt})
+                dt = retweet.dt.strftime("%F")
+                time = retweet.dt.strftime("%s")
+                userA_retweets_userB = Relationship(userA, "RETWEETED", userB, timestamp=time, date=dt)
                 graph.create(userA_retweets_userB)
 
 def create_reply_relations(users):
@@ -212,8 +213,9 @@ def create_reply_relations(users):
                 create_single_csv_node(replied_to_user,new_tweet)          
             
             print("creating reply relationship")
-            dt = reply.dt.strftime("%m/%d/%Y, %H:%M:%S")
-            userA_replied_to_userB = Relationship(node_exists_in_graph('User', user.author), "REPLIED_TO", node_exists_in_graph('User', replied_to_user), properties={'datetime': dt})
+            dt = reply.dt.strftime("%F")
+            time = reply.dt.strftime("%s")
+            userA_replied_to_userB = Relationship(node_exists_in_graph('User', user.author), "REPLIED_TO", node_exists_in_graph('User', replied_to_user), timestamp=time, date=dt)
             graph.create(userA_replied_to_userB)
 
 def create_mention_relations(users):
@@ -254,8 +256,9 @@ def create_mention_relations(users):
 
 
                 print("creating mention relationship")
-                dt = mention.dt.strftime("%m/%d/%Y, %H:%M:%S")
-                userA_mentioned_userB = Relationship(node_exists_in_graph('User', user.author) , "MENTIONED", node_exists_in_graph('User', mention), properties={'datetime': dt})
+                dt = mention.dt.strftime("%F")
+                time = mention.dt.strftime("%s")
+                userA_mentioned_userB = Relationship(node_exists_in_graph('User', user.author) , "MENTIONED", node_exists_in_graph('User', mention), timestamp=time, date=dt)
                 graph.create(userA_mentioned_userB)
 
 
@@ -280,11 +283,11 @@ def print_tweets(tweets):
         print("    Tweet: ", tweet.content)
         print("    Sentiment: ", tweet.sentiment)
 
-# users = create_user_nodes()
-# create_user_node_in_graph(users)
-# create_reply_relations(users)
-# create_retweet_relations(users)
-# create_mention_relations(users)
+users = create_user_nodes()
+create_user_node_in_graph(users)
+create_reply_relations(users)
+create_retweet_relations(users)
+create_mention_relations(users)
 
 
 
