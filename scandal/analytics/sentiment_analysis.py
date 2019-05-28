@@ -38,9 +38,10 @@ def empath_a_folder():
 
 def totaling_a_folder():
     #Go through all the given tweets empath results and return the top 10 category scoreres
+    fields = []
     totaling = np.zeros(194)
     total_tweets = 0
-    for file in glob(str(sys.argv[1])+"/*empath.tsv"):
+    for file in glob(str(sys.argv[1])+"/*/*empath.tsv"):
         with open(file, 'rU') as f:
             tsvreader = csv.reader(f, delimiter='\t') 
             tsvreader = csv.reader(f, delimiter='\t') 
@@ -55,11 +56,10 @@ def totaling_a_folder():
                     rates[count] = float(s)
                     count += 1
                 totaling = totaling + rates
+            
 
     print(total_tweets)
     track = pd.Series((totaling/float(total_tweets)), fields)
-    final = track.sort_values(ascending=False)[:50]
-    print(final)
-
-
-empath_a_folder()
+    final = track.sort_values(ascending=False)[:20]
+    #print(final)
+    return final
