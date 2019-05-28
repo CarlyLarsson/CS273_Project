@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import re
 from py2neo import Graph, Node, Relationship, NodeMatcher
+from datetime import datetime
 # from py2neo.data import Node, Relationship
 
 
@@ -17,7 +18,7 @@ password = "spring2019"
 graph = Graph(uri=uri, user=user, password=password)
 matcher = NodeMatcher(graph)
 # optionally clear the graph
-# graph.delete_all()
+graph.delete_all()
 
 # print(len(g.nodes))
 # print(len(g.relationships))
@@ -280,11 +281,12 @@ def print_tweets(tweets):
         print("    Tweet: ", tweet.content)
         print("    Sentiment: ", tweet.sentiment)
 
-# users = create_user_nodes()
-# create_user_node_in_graph(users)
-# create_reply_relations(users)
-# create_retweet_relations(users)
-# create_mention_relations(users)
+        
+users = create_user_nodes()
+create_user_node_in_graph(users)
+create_reply_relations(users)
+create_retweet_relations(users)
+create_mention_relations(users)
 
 
 
