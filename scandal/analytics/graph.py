@@ -72,10 +72,11 @@ class user_node:
                 self.my_retweets.append(tweet)
 
 class tweet:
-    def __init__(self, kind, sentiment, content):
+    def __init__(self, kind, sentiment, content, dt):
         self.kind = kind
         self.sentiment = sentiment
         self.content = content
+        self.dt = dt
 
 #A function to normalize the edge weights between 0-1
 def normalize(edge):
@@ -92,7 +93,8 @@ def create_user_nodes():
             fields = next(tsvreader)
             for row in tsvreader: 
                 sentiment = get_sentiment(fields, row)
-                new_tweet = tweet(row[17], sentiment, row[3])
+                dt = datetime.strptime(row[1], '%Y-%m-%d %X')
+                new_tweet = tweet(row[17], sentiment, row[3], dt)
                 
                 #If the user has been created already
                 #Increment the number of tweets
@@ -161,7 +163,7 @@ def create_retweet_relations(users):
                 
 
                 if author_node == None:
-                    new_tweet = tweet("Tweet", retweet.sentiment, retweet.content)
+                    new_tweet = tweet("Tweet", retweet.sentiment, retweet.content, retweet.datetime)
                     author_node = create_single_csv_node(author, new_tweet)
 
                 userB = node_exists_in_graph("User", author_node.author) 
@@ -180,7 +182,8 @@ def create_retweet_relations(users):
                     graph.create(user_node_in_graph)
                     userB = node_exists_in_graph("User", author_node.author)
                 print("creating retweet relationship")
-                userA_retweets_userB = Relationship(userA, "RETWEETED", userB)
+                properties = {datetime: retweet.dt}
+                userA_retweets_userB = Relationship(userA, "RETWEETED", userB, properties)
                 graph.create(userA_retweets_userB)
 
 def create_reply_relations(users):
@@ -205,11 +208,12 @@ def create_reply_relations(users):
 
             #if replied_to_user is not in csv original list, add user
             if replied_to_user not in users:
-                new_tweet = tweet(None, None, None)
+                new_tweet = tweet(None, None, None, None)
                 create_single_csv_node(replied_to_user,new_tweet)          
             
             print("creating reply relationship")
-            userA_replied_to_userB = Relationship(node_exists_in_graph('User', user.author) , "REPLIED_TO", node_exists_in_graph('User', replied_to_user))
+            properties = {datetime: reply.dt}
+            userA_replied_to_userB = Relationship(node_exists_in_graph('User', user.author), "REPLIED_TO", node_exists_in_graph('User', replied_to_user), properties)
             graph.create(userA_replied_to_userB)
 
 def create_mention_relations(users):
@@ -225,8 +229,8 @@ def create_mention_relations(users):
             #if replied_to_user is not in csv original list, add user
             for mention in mentions:
                 if mention not in users:
-                    new_tweet = tweet(None, None, None)
-                    new_node = create_single_csv_node(mention,new_tweet)  
+                    new_tweet = tweet(None, None, None, None)
+                    new_node = create_single_csv_node(mention, new_tweet)  
                     new_node.num_mentions += 1
 
                 if node_exists_in_graph('User', mention) != None:
@@ -250,7 +254,8 @@ def create_mention_relations(users):
 
 
                 print("creating mention relationship")
-                userA_mentioned_userB = Relationship(node_exists_in_graph('User', user.author) , "MENTIONED", node_exists_in_graph('User', mention))
+                properties = {datetime: tweet_.dt}
+                userA_mentioned_userB = Relationship(node_exists_in_graph('User', user.author) , "MENTIONED", node_exists_in_graph('User', mention), properties)
                 graph.create(userA_mentioned_userB)
 
 
@@ -280,15 +285,6 @@ def print_tweets(tweets):
 # create_reply_relations(users)
 # create_retweet_relations(users)
 # create_mention_relations(users)
-<<<<<<< HEAD
-
-                
-    
-
-
-=======
->>>>>>> 4c71849bb91ce2ea32f35d1159b1e8c5ce0475ba
-
 
 
 
