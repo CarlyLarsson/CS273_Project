@@ -163,7 +163,7 @@ def create_retweet_relations(users):
                 
 
                 if author_node == None:
-                    new_tweet = tweet("Tweet", retweet.sentiment, retweet.content, retweet.datetime)
+                    new_tweet = tweet("Tweet", retweet.sentiment, retweet.content, retweet.dt)
                     author_node = create_single_csv_node(author, new_tweet)
 
                 userB = node_exists_in_graph("User", author_node.author) 
