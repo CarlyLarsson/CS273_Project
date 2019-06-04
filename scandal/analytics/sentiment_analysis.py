@@ -17,11 +17,18 @@ def empath_a_folder():
         # print(os.path.splitext(os.path.basename(folder))[0])
         print(os.getcwd())
         cwd = os.getcwd()
-        empath_folder = cwd + "/empath_general/" + os.path.splitext(os.path.basename(folder))[0] + "/"
-        #os.makedirs(empath_folder)
+        empath_folder = cwd + "/empath_all/" + os.path.splitext(os.path.basename(folder))[0] + "/"
+        try:
+            os.makedirs(empath_folder)
+        except Exception as e:
+            print(str(e))
+            continue
         for file in glob(folder+"/*.tsv"):
             file_name = (os.path.splitext(os.path.basename(file))[0])
             print(file_name)
+            exists = os.path.isfile(empath_folder+file_name+"_empath.tsv")
+            if exists:
+                continue
             with open(file, 'rU') as f, open(empath_folder+file_name+"_empath.tsv", 'w') as nf:
                 tsvreader = csv.reader(f, delimiter='\t') 
                 fields = next(tsvreader)
