@@ -39,7 +39,7 @@ def remove_non_ascii(words):
 
 
 #split the files into respective folders
-# os.mkdir("/Users/Dana/Downloads/CS273_Project/scandal/postprocessing/")
+# os.mkdir("/Users/dananguyen/Google Drive/Documents/coursework/CS273_Project/scandal/postprocessing/")
 for folder in glob.glob(str(sys.argv[1])+"/*"):
     try:
         postprocess_folder = "/Users/dananguyen/Google Drive/Documents/coursework/CS273_Project/scandal/postprocessing/" + os.path.splitext(os.path.basename(folder))[0] + "/"
@@ -48,7 +48,7 @@ for folder in glob.glob(str(sys.argv[1])+"/*"):
         print(e)
         continue
 
-    for file in glob.glob(folder+"/*.tsv"):
+    for file in glob.glob(folder+"/*prepended.tsv"):
         file_name = (os.path.splitext(os.path.basename(file))[0])
         print(file_name)
         print(postprocess_folder+file_name)
@@ -63,8 +63,9 @@ for folder in glob.glob(str(sys.argv[1])+"/*"):
             header = next(reader, None)
             writer.writerow(header)
             # print(header)
-            for line in reader:
-                try:
+            # for line in reader:
+            try:
+                for line in reader:
                     loaded_data = line[3].encode("utf-8", errors="ignore").strip()
                     tweet_text = (loaded_data).strip().decode('utf-8', 'ignore')
                     # tweet_text = tweet_text.encode('utf-8')
@@ -80,16 +81,16 @@ for folder in glob.glob(str(sys.argv[1])+"/*"):
                     line[3] = tweet_text.encode("utf-8", errors="ignore").strip()
                     # print(tweet_text)
                     writer.writerow(line)
-                except Exception as e:
-                    print(e)
-
-                    with open("/Users/dananguyen/Google Drive/Documents/coursework/CS273_Project/scandal/preprocessing/errors_may27.txt", "a") as errorf:
-                        errorf.write(file_name + "   " + str(e)+"\n")
-                    # try:
-                    #     print(loaded_data["error"])
-                    # except Exception as error_again:
-                    #     print(error_again)
-                    continue
+            except Exception as e:
+                print(e)
+                # print(line)
+                with open("/Users/dananguyen/Google Drive/Documents/coursework/CS273_Project/scandal/preprocessing/errors_may27.txt", "a") as errorf:
+                    errorf.write(file_name + "   " + str(e)+"\n")
+                # try:
+                #     print(loaded_data["error"])
+                # except Exception as error_again:
+                #     print(error_again)
+                continue
 
                 
 
