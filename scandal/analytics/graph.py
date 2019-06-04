@@ -42,8 +42,8 @@ class user_node:
         self.name = name 
         self.location = location
 
-        self.latitude = []
-        self.longitude = []
+        self.latitude = 0
+        self.longitude = 0
 
         self.my_tweets = []
         self.my_replies = []
