@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import re
 from py2neo import Graph, Node, Relationship, NodeMatcher
+from datetime import datetime
 # from py2neo.data import Node, Relationship
 
 
@@ -17,7 +18,7 @@ password = "spring2019"
 graph = Graph(uri=uri, user=user, password=password)
 matcher = NodeMatcher(graph)
 # optionally clear the graph
-# graph.delete_all()
+graph.delete_all()
 
 # print(len(g.nodes))
 # print(len(g.relationships))
@@ -72,10 +73,11 @@ class user_node:
                 self.my_retweets.append(tweet)
 
 class tweet:
-    def __init__(self, kind, sentiment, content):
+    def __init__(self, kind, sentiment, content, dt):
         self.kind = kind
         self.sentiment = sentiment
         self.content = content
+        self.dt = dt
 
 #A function to normalize the edge weights between 0-1
 def normalize(edge):
@@ -92,7 +94,8 @@ def create_user_nodes():
             fields = next(tsvreader)
             for row in tsvreader: 
                 sentiment = get_sentiment(fields, row)
-                new_tweet = tweet(row[17], sentiment, row[3])
+                dt = datetime.strptime(row[1], '%Y-%m-%d %X')
+                new_tweet = tweet(row[17], sentiment, row[3], dt)
                 
                 #If the user has been created already
                 #Increment the number of tweets
@@ -112,7 +115,7 @@ def create_user_nodes():
 
 #Graph stuff
 def create_user_node_in_graph(users):
-    graph.delete_all()
+    #graph.delete_all()
     #https://stackoverflow.com/questions/51796919/py2neo-cannot-create-graph
     # https://py2neo.org/2.0/essentials.html#py2neo.Graph.create
     for user in users.values():  
@@ -161,7 +164,7 @@ def create_retweet_relations(users):
                 
 
                 if author_node == None:
-                    new_tweet = tweet("Tweet", retweet.sentiment, retweet.content)
+                    new_tweet = tweet("Tweet", retweet.sentiment, retweet.content, retweet.dt)
                     author_node = create_single_csv_node(author, new_tweet)
 
                 userB = node_exists_in_graph("User", author_node.author) 
@@ -180,7 +183,9 @@ def create_retweet_relations(users):
                     graph.create(user_node_in_graph)
                     userB = node_exists_in_graph("User", author_node.author)
                 print("creating retweet relationship")
-                userA_retweets_userB = Relationship(userA, "RETWEETED", userB)
+                dt = retweet.dt.strftime("%F")
+                time = retweet.dt.strftime("%s")
+                userA_retweets_userB = Relationship(userA, "RETWEETED", userB, timestamp=time, date=dt)
                 graph.create(userA_retweets_userB)
 
 def create_reply_relations(users):
@@ -203,14 +208,15 @@ def create_reply_relations(users):
 
                 graph.create(user_node_in_graph)
 
-
             #if replied_to_user is not in csv original list, add user
             if replied_to_user not in users:
-                new_tweet = tweet(None, None, None)
+                new_tweet = tweet(None, None, None, None)
                 create_single_csv_node(replied_to_user,new_tweet)          
             
             print("creating reply relationship")
-            userA_replied_to_userB = Relationship(node_exists_in_graph('User', user.author) , "REPLIED_TO", node_exists_in_graph('User', replied_to_user))
+            dt = reply.dt.strftime("%F")
+            time = reply.dt.strftime("%s")
+            userA_replied_to_userB = Relationship(node_exists_in_graph('User', user.author), "REPLIED_TO", node_exists_in_graph('User', replied_to_user), timestamp=time, date=dt)
             graph.create(userA_replied_to_userB)
 
 def create_mention_relations(users):
@@ -226,8 +232,8 @@ def create_mention_relations(users):
             #if replied_to_user is not in csv original list, add user
             for mention in mentions:
                 if mention not in users:
-                    new_tweet = tweet(None, None, None)
-                    new_node = create_single_csv_node(mention,new_tweet)  
+                    new_tweet = tweet(None, None, None, None)
+                    new_node = create_single_csv_node(mention, new_tweet)  
                     new_node.num_mentions += 1
 
                 if node_exists_in_graph('User', mention) != None:
@@ -251,7 +257,9 @@ def create_mention_relations(users):
 
 
                 print("creating mention relationship")
-                userA_mentioned_userB = Relationship(node_exists_in_graph('User', user.author) , "MENTIONED", node_exists_in_graph('User', mention))
+                dt = mention.dt.strftime("%F")
+                time = mention.dt.strftime("%s")
+                userA_mentioned_userB = Relationship(node_exists_in_graph('User', user.author) , "MENTIONED", node_exists_in_graph('User', mention), timestamp=time, date=dt)
                 graph.create(userA_mentioned_userB)
 
 
@@ -276,17 +284,11 @@ def print_tweets(tweets):
         print("    Tweet: ", tweet.content)
         print("    Sentiment: ", tweet.sentiment)
 
-# users = create_user_nodes()
-# create_user_node_in_graph(users)
-# create_reply_relations(users)
-# create_retweet_relations(users)
-# create_mention_relations(users)
-
-                
-    
-
-
-
+users = create_user_nodes()
+create_user_node_in_graph(users)
+create_reply_relations(users)
+create_retweet_relations(users)
+create_mention_relations(users)
 
 
 
