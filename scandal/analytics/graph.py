@@ -111,34 +111,6 @@ def create_user_nodes():
                     users[row[4]] = new_user
     return users
 
-
-#Graph stuff
-def create_user_node_in_graph(users):
-    uri = "bolt://localhost:7687"
-    user = "neo4j"
-    password = "spring2019"
-
-    graph = Graph(uri=uri, user=user, password=password)
-    matcher = NodeMatcher(graph)
-    # optionally clear the graph
-    graph.delete_all()
-    #graph.delete_all()
-    #https://stackoverflow.com/questions/51796919/py2neo-cannot-create-graph
-    # https://py2neo.org/2.0/essentials.html#py2neo.Graph.create
-    for user in users.values():  
-        user_node_in_graph = Node("User", 
-                                        author=user.author,
-                                        name=user.name, 
-                                        location=user.location, 
-                                        orig_tweet_count=user.num_tweets,
-                                        retweet_count=user.num_retweets,
-                                        reply_count=user.num_replies,
-                                        mention_count=user.num_mentions)
-        graph.create(user_node_in_graph)
-        # tx.commit()
-    return (len(graph.nodes))
-
-
 def node_exists_in_graph(lbl, username):
     matcher = NodeMatcher(graph)
     # matcher.match("Person", name="Keanu Reeves").first()
@@ -148,6 +120,35 @@ def node_exists_in_graph(lbl, username):
     else:
         # print(m)
         return m
+#Graph stuff
+def create_user_node_in_graph(users):
+    uri = "bolt://localhost:7687"
+    user = "neo4j"
+    password = "spring2019"
+
+    graph = Graph(uri=uri, user=user, password=password)
+    matcher = NodeMatcher(graph)
+    # optionally clear the graph
+    # graph.delete_all()
+    #graph.delete_all()
+    #https://stackoverflow.com/questions/51796919/py2neo-cannot-create-graph
+    # https://py2neo.org/2.0/essentials.html#py2neo.Graph.create
+    for user in users.values(): 
+        if node_exists_in_graph('User', user.author) == None:
+            user_node_in_graph = Node("User", 
+                                            author=user.author,
+                                            name=user.name, 
+                                            location=user.location, 
+                                            orig_tweet_count=user.num_tweets,
+                                            retweet_count=user.num_retweets,
+                                            reply_count=user.num_replies,
+                                            mention_count=user.num_mentions)
+            graph.create(user_node_in_graph)
+        # tx.commit()
+    return (len(graph.nodes))
+
+
+
 
 def find_node_csv(author):
     for user in users.values():
@@ -291,11 +292,11 @@ def print_tweets(tweets):
         print("    Tweet: ", tweet.content)
         print("    Sentiment: ", tweet.sentiment)
 
-#users = create_user_nodes()
-# create_user_node_in_graph(users)
-# create_reply_relations(users)
-# create_retweet_relations(users)
-# create_mention_relations(users)
+users = create_user_nodes()
+create_user_node_in_graph(users)
+create_reply_relations(users)
+create_retweet_relations(users)
+create_mention_relations(users)
 
 
 
