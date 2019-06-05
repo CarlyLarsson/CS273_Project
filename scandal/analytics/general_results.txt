@@ -1,0 +1,96 @@
+Tweet_Final
+Total Tweets 84004.0
+optimism          11.727144
+business          10.837532
+family             9.919111
+social_media       9.491012
+play               8.660516
+money              8.508190
+vacation           7.799843
+wedding            7.310128
+communication      7.104805
+school             7.037308
+swearing_terms     6.807652
+celebration        6.603114
+help               6.196157
+home               6.133041
+domestic_work      5.840722
+internet           5.798724
+hate               5.791986
+dance              5.700300
+attractive         5.679920
+speaking           5.599733
+sports             5.489072
+dtype: float64
+Retweet_Final
+Total Retweets 225425.0
+optimism          49.375503
+family            47.829016
+social_media      46.954642
+wedding           42.969578
+business          39.634845
+government        37.002229
+money             36.879194
+help              33.945929
+communication     33.783541
+play              32.228442
+celebration       31.232466
+crime             31.196718
+speaking          31.060946
+swearing_terms    30.836397
+school            29.612007
+vacation          28.258344
+hate              27.768475
+home              25.842475
+childish          25.823082
+leader            25.179625
+dance             25.108273
+dtype: float64
+Mention_Final
+Total Mentions 76165.0
+social_media     16.446964
+optimism         16.373702
+business         13.052163
+wedding          12.837130
+government       12.276951
+play             11.735128
+family           11.193816
+help             11.184061
+celebration      11.033651
+money            10.893468
+communication    10.712322
+speaking          9.871660
+dance             9.139474
+crime             8.816845
+leader            8.699796
+vacation          8.410976
+school            8.156148
+music             7.935692
+art               7.871700
+dispute           7.830998
+attractive        7.708738
+dtype: float64
+Reply_Final
+Total Reply 69094.0
+optimism          4.007235
+business          2.475218
+family            2.386931
+communication     2.306896
+money             2.278359
+speaking          2.077742
+hate              2.052501
+swearing_terms    2.025800
+wedding           2.012732
+play              1.904137
+social_media      1.833217
+attractive        1.674703
+violence          1.674504
+love              1.599388
+help              1.595546
+dispute           1.588440
+government        1.585605
+suffering         1.428839
+childish          1.427242
+school            1.326029
+vacation          1.324192
+dtype: float64

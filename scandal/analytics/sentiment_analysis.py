@@ -5,6 +5,7 @@ import sys
 import os
 import numpy as np
 import pandas as pd
+import re
 
 def sent_analyze(tweet):
     lexicon = Empath()
@@ -50,27 +51,36 @@ def totaling_a_folder():
     fields = []
     totaling = np.zeros(194)
     total_tweets = 0
-    for file in glob(str(sys.argv[1])+"/*/*empath.tsv"):
+    for file in glob(str(sys.argv[1])+"/*empath.tsv"):
+        #print(file)
         with open(file, 'rU') as f:
             tsvreader = csv.reader(f, delimiter='\t') 
             tsvreader = csv.reader(f, delimiter='\t') 
-            fields = next(tsvreader)[20:]
+            fields = next(tsvreader)[21:]
             #194 categories
             
             for row in tsvreader:
                 total_tweets += 1
                 rates = np.zeros(194)
                 count = 0
-                for s in row[20:]:
-                    rates[count] = float(s)
-                    count += 1
+                for s in row[21:]:
+                    frates, count = floats_man(s, rates, count)
                 totaling = totaling + rates
             
-    print(total_tweets)
+    print("Total Tweets", total_tweets)
+    #print(totaling)
     track = pd.Series((totaling/float(total_tweets)), fields)
-    final = track.sort_values(ascending=False)[:20]
-    #print(final)
+    final = track.sort_values(ascending=False)[:21]
+    print(final)
     return final
+
+def floats_man(s, rates, count):
+    try:
+        rates[count] = float(s)
+    except:
+        rates[count] = 0.0
+    count += 1
+    return rates, count
 
 def total_a_folder_by_category():
     fields = []
@@ -84,39 +94,37 @@ def total_a_folder_by_category():
     retweet_totaling = np.zeros(194)
     mention_totaling = np.zeros(194)
 
-    for file in glob(str(sys.argv[1])+"/*/*empath.tsv"):
+    for file in glob(str(sys.argv[1])+"/*empath.tsv"):
+        #print(file)
         with open(file, 'rU') as f:
             tsvreader = csv.reader(f, delimiter='\t') 
             tsvreader = csv.reader(f, delimiter='\t') 
-            fields = next(tsvreader)[20:]
+            fields = next(tsvreader)[21:]
             #194 categories
             
             for row in tsvreader:
-                print(row[19])
-                if row[17] == "Tweet":
-                    print("Tweet")
+                if row[18] == "Tweet":
+                    #print("Tweet")
                     total_tweets += 1
                     tweet_rates = np.zeros(194)
                     count = 0
-                    for s in row[20:]:
-                        tweet_rates[count] = float(s)
-                        count += 1
+                    #print(row[21:])
+                    for s in row[21:]:
+                        tweet_rates, count = floats_man(s, tweet_rates, count)
                         tweet_totaling = tweet_totaling + tweet_rates
-                if row[19] == "Reply":
+                if row[18] == "Reply":
                     total_replies += 1
                     reply_rates = np.zeros(194)
                     count = 0
-                    for s in row[20:]:
-                        reply_rates[count] = float(s)
-                        count += 1
+                    for s in row[21:]:
+                        reply_rates, count = floats_man(s, reply_rates, count)
                         reply_totaling = reply_totaling + reply_rates
-                if row[19] == "Retweet":
+                if row[18] == "Retweet":
                     total_retweets += 1
                     retweet_rates = np.zeros(194)
                     count = 0
-                    for s in row[20:]:
-                        retweet_rates[count] = float(s)
-                        count += 1
+                    for s in row[21:]:
+                        retweet_rates, count = floats_man(s, retweet_rates, count)
                         retweet_totaling = retweet_totaling + retweet_rates
                 mentions = ['@'+re.sub(r'[^\w\s]','',i) for i in ((row[3].replace('b\'','').replace('b\"','')).strip('\'').strip('\"')).split(" ") if "@" in i][1:]
                 #print(mentions)
@@ -124,30 +132,32 @@ def total_a_folder_by_category():
                     total_mentions += 1
                     mention_rates = np.zeros(194)
                     count = 0
-                    for s in row[20:]:
-                        print("Row", row[20])
-                        mention_rates[count] = float(s)
-                        count += 1
+                    for s in row[21:]:
+                        mention_rates, count = floats_man(s, mention_rates, count)
                         mention_totaling = mention_totaling + mention_rates
             
-    print(tweet_totaling)
+   
     tweet_track = pd.Series((tweet_totaling/float(total_tweets)), fields)
     retweet_track = pd.Series((retweet_totaling/float(total_replies)), fields)
     reply_track = pd.Series((reply_totaling/float(total_retweets)), fields)
     mention_track = pd.Series((mention_totaling/float(total_mentions)), fields)
-    tweet_final = tweet_track.sort_values(ascending=False)[:20]
-    retweet_final = retweet_track.sort_values(ascending=False)[:20]
-    reply_final = reply_track.sort_values(ascending=False)[:20]
-    mention_final = mention_track.sort_values(ascending=False)[:20]
+    tweet_final = tweet_track.sort_values(ascending=False)[:21]
+    retweet_final = retweet_track.sort_values(ascending=False)[:21]
+    reply_final = reply_track.sort_values(ascending=False)[:21]
+    mention_final = mention_track.sort_values(ascending=False)[:21]
 
     print("Tweet_Final")
+    print("Total Tweets", float(total_tweets))
     print(tweet_final)
     print("Retweet_Final")
+    print("Total Retweets", float(total_retweets))
     print(retweet_final)
     print("Mention_Final")
+    print("Total Mentions", float(total_mentions))
     print(mention_final)
     print("Reply_Final")
+    print("Total Reply", float(total_replies))
     print(reply_final)
-    return final
 
-empath_a_folder()
+#totaling_a_folder()
+total_a_folder_by_category()
