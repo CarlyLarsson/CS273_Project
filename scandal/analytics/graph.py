@@ -8,17 +8,11 @@ import pandas as pd
 import re
 from py2neo import Graph, Node, Relationship, NodeMatcher
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 # from py2neo.data import Node, Relationship
 
 
-uri = "bolt://localhost:7687"
-user = "neo4j"
-password = "spring2019"
 
-graph = Graph(uri=uri, user=user, password=password)
-matcher = NodeMatcher(graph)
-# optionally clear the graph
-graph.delete_all()
 
 # print(len(g.nodes))
 # print(len(g.relationships))
@@ -46,6 +40,7 @@ class user_node:
         self.latitude = 0
         self.longitude = 0
 
+        self.my_original_tweets = []
         self.my_tweets = []
         self.my_replies = []
         self.my_retweets = []
@@ -57,9 +52,11 @@ class user_node:
         self.num_retweets = 0
         self.num_replies = 0 
         self.num_mentions = 0
+        self.total_tweets = 0
 
     def update_info(self, tweet):
         if tweet != None:
+            self.my_original_tweets.append(tweet)
             if tweet.kind == "Tweet":
                 self.num_tweets += 1
                 self.my_tweets.append(tweet)
@@ -94,7 +91,9 @@ def create_user_nodes():
             fields = next(tsvreader)
             for row in tsvreader: 
                 sentiment = get_sentiment(fields, row)
-                dt = datetime.strptime(row[1], '%Y-%m-%d %X')
+                dt = row[1]
+                if row[1] != "": 
+                    dt = datetime.strptime(row[1], '%Y-%m-%d %X')
                 new_tweet = tweet(row[17], sentiment, row[3], dt)
                 
                 #If the user has been created already
@@ -115,6 +114,14 @@ def create_user_nodes():
 
 #Graph stuff
 def create_user_node_in_graph(users):
+    uri = "bolt://localhost:7687"
+    user = "neo4j"
+    password = "spring2019"
+
+    graph = Graph(uri=uri, user=user, password=password)
+    matcher = NodeMatcher(graph)
+    # optionally clear the graph
+    graph.delete_all()
     #graph.delete_all()
     #https://stackoverflow.com/questions/51796919/py2neo-cannot-create-graph
     # https://py2neo.org/2.0/essentials.html#py2neo.Graph.create
@@ -265,8 +272,8 @@ def create_mention_relations(users):
 
 def get_sentiment(fields, row):
     sentiment = {}
-    count = 20
-    for s in row[20:]:
+    count = 21
+    for s in row[21:]:
         if float(s) > 0:
             sentiment[fields[count]] = float(s)
         count += 1
@@ -284,11 +291,11 @@ def print_tweets(tweets):
         print("    Tweet: ", tweet.content)
         print("    Sentiment: ", tweet.sentiment)
 
-users = create_user_nodes()
-create_user_node_in_graph(users)
-create_reply_relations(users)
-create_retweet_relations(users)
-create_mention_relations(users)
+#users = create_user_nodes()
+# create_user_node_in_graph(users)
+# create_reply_relations(users)
+# create_retweet_relations(users)
+# create_mention_relations(users)
 
 
 
