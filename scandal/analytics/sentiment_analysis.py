@@ -160,4 +160,5 @@ def total_a_folder_by_category():
     print(reply_final)
 
 #totaling_a_folder()
-total_a_folder_by_category()
+# total_a_folder_by_category()
+empath_a_folder()

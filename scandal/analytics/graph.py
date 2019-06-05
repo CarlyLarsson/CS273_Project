@@ -10,6 +10,7 @@ from py2neo import Graph, Node, Relationship, NodeMatcher
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 # from py2neo.data import Node, Relationship
+from tqdm import tqdm
 
 uri = "bolt://localhost:7687"
 user = "neo4j"
@@ -133,7 +134,7 @@ def create_user_node_in_graph(users):
     #graph.delete_all()
     #https://stackoverflow.com/questions/51796919/py2neo-cannot-create-graph
     # https://py2neo.org/2.0/essentials.html#py2neo.Graph.create
-    for user in users.values(): 
+    for user in tqdm(users.values()): 
         if node_exists_in_graph('User', user.author) == None:
             user_node_in_graph = Node("User", 
                                             author=user.author,
