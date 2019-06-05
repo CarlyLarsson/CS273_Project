@@ -11,7 +11,12 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 # from py2neo.data import Node, Relationship
 
+uri = "bolt://localhost:7687"
+user = "neo4j"
+password = "spring2019"
 
+graph = Graph(uri=uri, user=user, password=password)
+matcher = NodeMatcher(graph)
 
 
 # print(len(g.nodes))
@@ -122,12 +127,7 @@ def node_exists_in_graph(lbl, username):
         return m
 #Graph stuff
 def create_user_node_in_graph(users):
-    uri = "bolt://localhost:7687"
-    user = "neo4j"
-    password = "spring2019"
-
-    graph = Graph(uri=uri, user=user, password=password)
-    matcher = NodeMatcher(graph)
+    
     # optionally clear the graph
     # graph.delete_all()
     #graph.delete_all()
