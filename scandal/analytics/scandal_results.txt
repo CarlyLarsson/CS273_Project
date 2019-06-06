@@ -1,0 +1,92 @@
+Tweet_Final
+Total Tweets 22497.0
+school           57.608081
+college          53.703160
+money            39.894608
+family           37.690492
+banking          31.290128
+wealthy          27.723696
+business         22.270792
+crime            21.895853
+stealing         20.861004
+sports           16.598124
+communication    11.431924
+play             10.779482
+government       10.592079
+dispute          10.124550
+royalty           9.766813
+valuable          9.485843
+reading           9.221318
+help              8.726852
+optimism          8.536649
+wedding           8.175312
+dtype: float64
+Retweet_Final
+Total Retweets 79590.0
+school           2361.709343
+college          1982.325260
+family           1612.858131
+money             951.805652
+stealing          906.376009
+banking           884.967128
+crime             843.965110
+wealthy           789.773356
+sports            669.254902
+wedding           512.693195
+business          502.268166
+domestic_work     489.121972
+communication     487.058824
+home              479.665513
+optimism          435.886101
+healing           428.359285
+prison            422.456747
+government        388.193195
+dispute           377.945502
+work              320.988466
+dtype: float64
+Mention_Final
+Total Mentions 17726.0
+college          62.340968
+school           59.537008
+prison           44.434898
+money            38.638723
+family           33.384520
+stealing         31.200384
+government       31.117116
+banking          30.190116
+office           27.241679
+business         25.777107
+internet         19.369683
+wealthy          19.043608
+crime            18.881756
+wedding          18.798827
+sports           17.249238
+beach            16.826131
+social_media     16.045752
+communication    15.326639
+heroic           15.011621
+domestic_work    13.689552
+dtype: float64
+Reply_Final
+Total Reply 3468.0
+school           1.901847
+family           1.844202
+college          1.812891
+money            1.631863
+banking          1.275110
+crime            1.056351
+stealing         1.045508
+wealthy          1.040106
+business         0.961352
+sports           0.752858
+government       0.603041
+dispute          0.547870
+optimism         0.542606
+communication    0.524689
+play             0.517301
+wedding          0.475060
+home             0.466139
+speaking         0.456087
+domestic_work    0.434565
+occupation       0.418470
+dtype: float64
