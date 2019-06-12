@@ -232,7 +232,7 @@ def get_different_times():
     return users_time
 def get_every_day(all_data,dataframe_):
 # def get_every_day():
-    users = create_user_nodes()
+    # users = create_user_nodes()
     # pd.DataFrame([])
     # data = pd.read_csv('hashtags_map_data.csv', sep=",")
     # users_time = []
@@ -246,7 +246,7 @@ def get_every_day(all_data,dataframe_):
 
     data['Date']=pd.to_datetime(data['Date'])
     data.sort_values(by=['Date'])
-    pickle.dump( data, open( "dates_added_data2.p", "wb" ) )
+    pickle.dump( data, open( "dates_added_data_replies2.p", "wb" ) )
 
     print("getting everyday now")
     first_day = datetime.strptime("2019-03-13 00:00:00", '%Y-%m-%d %X')
@@ -258,7 +258,7 @@ def get_every_day(all_data,dataframe_):
         new_data = data.drop(data[data.Date > first_day].index)
         new_data2 = all_data.drop(all_data[all_data.Date > first_day].index)
         create_map(new_data2,new_data, ("day_%d" % count),count)
-        create_map(new_data, ("day_%d" % count),count)
+        # create_map(new_data, ("day_%d" % count),count)
         print("finished day: %d" % count)
         count= count + 1
         first_day = first_day + relativedelta(days=+1)
@@ -329,7 +329,7 @@ def create_map(original_dataframe,relations_dataframe_,map_name,day_num):
     plt.figure(figsize=(2600/my_dpi, 1800/my_dpi), dpi=my_dpi)
     
     data = original_dataframe
-    # data2 = relations_dataframe_
+    data2 = relations_dataframe_
     # data2= data2[data2['lon2'] != 0]
     # data2= data2[data2['lat2'] != 0]
     # making separate last name column from new data frame 
@@ -352,11 +352,11 @@ def create_map(original_dataframe,relations_dataframe_,map_name,day_num):
     #doing one day
     print("plotting days")
     m.scatter(data['lon'], data['lat'], s=data["location"].value_counts()/3, alpha=1,color="blue")
-    # m.scatter(data2['lon2'], data2['lat2'], s=data["location"].value_counts()/3, alpha=1,color="red")
+    m.scatter(data2['lon2'], data2['lat2'], s=data["location"].value_counts()/3, alpha=1,color="red")
     # copyright and source data info
     plt.text( -170, -58,'College Admissions Scandal Day: %d ' % day_num, ha='left', va='bottom', size=30, color='#555555' )
     # Save as png
-    plt.savefig("maps_graphs2/"+str(map_name)+'.png', bbox_inches='tight')
+    plt.savefig("maps_replies2/"+str(map_name)+'.png', bbox_inches='tight')
     return
 
 def get_replies_data() :
@@ -425,114 +425,118 @@ def draw_lines_map(relations_dict, dataframe_,map_name):
     # making separate last name column from new data frame 
     # data["Last Name"]= new[1] 
   
-    # Make the background map
-    # m = Basemap(projection='merc',llcrnrlat=-80,urcrnrlat=80,llcrnrlon=-180,urcrnrlon=180,resolution='c')
-    # # m = Basemap(llcrnrlon=-119,llcrnrlat=22,urcrnrlon=-64,urcrnrlat=49,
-    # #     projection='lcc',lat_1=33,lat_2=45,lon_0=-95,resolution='c')    
-#     # m.drawmapboundary(fill_color='#A6CAE0', linewidth=0)
-#     # m.fillcontinents(color='grey', alpha=0.3)
-#     # m.drawcoastlines(linewidth=0.1, color="white")
+    #Make the background map
+    m = Basemap(projection='merc',llcrnrlat=-80,urcrnrlat=80,llcrnrlon=-180,urcrnrlon=180,resolution='c')
+    # m = Basemap(llcrnrlon=-119,llcrnrlat=22,urcrnrlon=-64,urcrnrlat=49,
+    #     projection='lcc',lat_1=33,lat_2=45,lon_0=-95,resolution='c')    
+    m.drawmapboundary(fill_color='#A6CAE0', linewidth=0)
+    m.fillcontinents(color='grey', alpha=0.3)
+    m.drawcoastlines(linewidth=0.1, color="white")
     
 #     # prepare a color for each point depending on the continent.
 #     # data['labels_enc'] = pd.factorize(data['country'])[0]
-#     # data.dropna(subset = ['lon2'])
-#     # data.dropna(subset = ['lat2'])
-#     # if data.loc[data["author"] == user["n.author"], ["lat2"]] 
-    
-#     # data= data[data['lon2'] != 0]
-#     # data= data[data['lat2'] != 0]
 
-#     data = data[np.isfinite(data['lon2'])]
-#     data = data[np.isfinite(data['lat2'])]
+
+    data = data[np.isfinite(data['lon2'])]
+    data = data[np.isfinite(data['lat2'])]
 
 
 #     print(data)
-#     pickle.dump( data, open( map_name+".p", "wb" ) )
+    pickle.dump( data, open( map_name+".p", "wb" ) )
 
-#     # Add a point per position
-#     #doing one day
-#     print("plotting days")
-#     # print(type(data['lon'].tolist()))
-#     #https://stackoverflow.com/questions/45512429/python-basemap-drawgreatcircle-with-arrow-end-cap
-#     for index, row in data.iterrows():
-#         # print(row["lon"])
-#         line, = m.drawgreatcircle(row['lon'], row['lat'],row['lon2'], row['lat2'],linewidth=3,alpha=0.6,color='r')
+    # Add a point per position
+    #doing one day
+    print("plotting days")
+    # print(type(data['lon'].tolist()))
+    #https://stackoverflow.com/questions/45512429/python-basemap-drawgreatcircle-with-arrow-end-cap
+    for index, row in data.iterrows():
+        # print(row["lon"])
+        line, = m.drawgreatcircle(row['lon'], row['lat'],row['lon2'], row['lat2'],linewidth=3,alpha=0.6,color='r')
 
-#         # path = line.get_path()  # get path from the great circle
-#         # startx,starty = m(row['lon'],row['lat'])
-#         # m.plot(startx,starty, linestyle='none',marker='o', color='r', markersize=15)
+        path = line.get_path()  # get path from the great circle
+        startx,starty = m(row['lon'],row['lat'])
+        m.plot(startx,starty, linestyle='none',marker='o', color='r', markersize=15)
 
-#         # head = m(row['lon2'],row['lat2'])             # get location of arrow's head (at London)
-#         # # m.plot(head[0], head[1], marker='o', color='r', markersize=30)
+        head = m(row['lon2'],row['lat2'])             # get location of arrow's head (at London)
+        # m.plot(head[0], head[1], marker='o', color='r', markersize=30)
 
-#         # tail = path.vertices[-len(path)//6]  # get location of arrow's tail
-#         # plt.annotate('',
-#         #     xy=(head[0], head[1]), 
-#         #     xycoords='data',
-#         #     xytext=(tail[0], tail[1]), 
-#         #     textcoords='data',
-#         #     size=22,
-#         #     arrowprops=dict(headwidth=10, \
-#         #                     headlength=20, \
-#         #                     facecolor="red", \
-#         #                     alpha = 0.6,\
-#         #                     edgecolor="none", \
-#         #                     connectionstyle="arc3, rad=0.001") )
-# # draw annotation with arrow in 'red' color
-# # blank text is specified, because we need the arrow only
-# # adjust facecolor and other arrow properties as needed
+        tail = path.vertices[-len(path)//6]  # get location of arrow's tail
+        # draw annotation with arrow in 'red' color
+        # blank text is specified, because we need the arrow only
+        # adjust facecolor and other arrow properties as needed
+        plt.annotate('',
+            xy=(head[0], head[1]), 
+            xycoords='data',
+            xytext=(tail[0], tail[1]), 
+            textcoords='data',
+            size=22,
+            arrowprops=dict(headwidth=10, \
+                            headlength=20, \
+                            facecolor="red", \
+                            alpha = 0.6,\
+                            edgecolor="none", \
+                            connectionstyle="arc3, rad=0.001") )
+        
 
-#         # line_list.append(line)
-#     # def animate(i):
-#     #     for x,y,z,w in tqdm(zip(data['lon'], data['lat'], data['lon2'], data['lat2'])):
-#     #         line, = m.drawgreatcircle(x,y,z,w,linewidth=1,color='b')
 
-       
-#     # m.scatter(data['lon'], data['lat'], s=data["location"].value_counts()/3, alpha=1,cmap="terrain")
-#     # copyright and source data info
-#     # ani = matplotlib.animation.FuncAnimation(fig, animate,frames=200,interval=100)
-#     # ani.save(str(map_name)+".gif",fps=10)
-#     plt.text( -170, -58,'College Admissions Scandal', ha='left', va='bottom', size=9, color='#555555' )
-#     # Save as png
-#     plt.savefig(str(map_name)+'.png',bbox_inches='tight')
+    # m.scatter(data['lon'], data['lat'], s=data["location"].value_counts()/3, alpha=1,cmap="terrain")
+    # create animation
+    # ani = matplotlib.animation.FuncAnimation(fig, animate,frames=200,interval=100)
+    # ani.save(str(map_name)+".gif",fps=10)
+    plt.text( -170, -58,'College Admissions Scandal', ha='left', va='bottom', size=9, color='#555555' )
+    # Save as png
+    plt.savefig(str(map_name)+'.png',bbox_inches='tight')
 
+    return
+
+
+def get_interact_loc(relations_dict, dataframe_,map_name):
+    print("Creating map")
+    data = dataframe_
+    # data["retweeted"] = 0
+    data["lat2"] = np.nan
+    data["lon2"] = np.nan
+    for user in tqdm(relations_dict):
+        # print(data.loc[data["author"] == user["m.author"], ["lat"]].values[0])
+        # data.loc[data["author"] == user["n.author"], ["retweeted"]] = user["m.author"]
+        try:
+            print(data.loc[data["author"] == user["m.author"], ["lat"]].values[0][0])
+            data.loc[data["author"] == user["n.author"], ["lat2"]] = data.loc[data["author"] == user["m.author"], ["lat"]].values[0][0]
+            data.loc[data["author"] == user["n.author"], ["lon2"]] = data.loc[data["author"] == user["m.author"], ["lon"]].values[0][0]
+        except Exception as e:
+            continue
     
-# dates_data = pickle.load( open( "dates_added_data.p", "rb" ) )    
-# mentions_data = pickle.load( open( "dates_added_data_replies.p", "rb" ) )
-# get_every_day(dates_data,mentions_data)
-# get_every_day()
+    data = data[np.isfinite(data['lon2'])]
+    data = data[np.isfinite(data['lat2'])]
 
-    
-#need to figure out most effect way to get latitude and longitude without data
-            
+    pickle.dump( data, open( map_name+".p", "wb" ) )
+    return
+
+
+#script stuff here
+#get locations
 # in_US_city_, in_US_no_city_, not_US_city_, not_US_no_city_ = get_US_location()       
 # get_location_not_US(not_US_city_,not_US_no_city_) 
 # merge_capital_to_US_data()
-# create_map()
-# users_time_ = get_different_times()
-# one_day_data_,three_day_data_,week_day_data_,month_day_data_,month2_day_data_,all_data = create_data_frame_for_map(users_time_)
 
-
-# replies_dict = get_replies_data()
-# all_data = pickle.load( open( "data_map.p", "rb" ) )
-# all_data = pickle.load( open( "all_months_rewteets.p", "rb" ) )
-
-
+#get relations dict from user relationships
 # all_data = pickle.load( open( "data.p", "rb" ) )
-# mentions_dict = get_mention_data()
-# draw_lines_map(mentions_dict,all_data,"all_months_mentions2")
+# # mentions_dict = get_mention_data()
+# # get_interact_loc(mentions_dict,all_data,"all_months_mentions2")
+# retweet_dict = get_retweet_data()
+# replies_dict = get_replies_data()
+# get_interact_loc(retweet_dict,all_data,"all_months_retweet2")
+# get_interact_loc(replies_dict,all_data,"all_months_replies2")
+
+dates_data = pickle.load( open( "dates_added_data2.p", "rb" ) )    
+mentions_data = pickle.load( open( "dates_added_data_replies2.p", "rb" ) )
+# mentions_data = pickle.load( open( "all_months_mentions2.p", "rb" ) )
+# reply_data = pickle.load( open( "all_months_replies2.p", "rb" ) )
+get_every_day(dates_data,mentions_data)
+# get_every_day()
+
+    
+            
 
 
-all_data = pickle.load( open( "data.p", "rb" ) )
-mentions_dict = get_mention_data()
-draw_lines_map(mentions_dict,all_data,"all_months_mentions2")
-retweet_dict = get_retweet_data()
-replies_dict = get_replies_data()
-draw_lines_map(retweet_dict,all_data,"all_months_retweet2")
-draw_lines_map(replies_dict,all_data,"all_months_replies2")
 
-# create_map(one_day_data_,"1day")
-# create_map(three_day_data_,"3day")
-# create_map(week_day_data_,"1week")
-# create_map(month_day_data_,"1month")
-# create_map(month2_day_data_,"2month")

@@ -11,7 +11,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 # from py2neo.data import Node, Relationship
 from tqdm import tqdm
-
+import dill
 uri = "bolt://localhost:7687"
 user = "neo4j"
 password = "spring2019"
@@ -74,6 +74,7 @@ class user_node:
             if tweet.kind == "Retweet":
                 self.num_retweets += 1
                 self.my_retweets.append(tweet)
+                self.my_potential_mentions.append(tweet)
 
 class tweet:
     def __init__(self, kind, sentiment, content, dt):
@@ -136,6 +137,7 @@ def create_user_node_in_graph(users):
     # https://py2neo.org/2.0/essentials.html#py2neo.Graph.create
     for user in tqdm(users.values()): 
         if node_exists_in_graph('User', user.author) == None:
+            print("putting %s into graph" % user.author)
             user_node_in_graph = Node("User", 
                                             author=user.author,
                                             name=user.name, 
@@ -151,11 +153,12 @@ def create_user_node_in_graph(users):
 
 
 
-def find_node_csv(author):
-    for user in users.values():
-        if user.author == author:
-            return user
-    return None
+# def find_node_csv(author):
+#     dict = {user.author: user for user in users.values()}
+#     for user in users.values():
+#         if user.author == author:
+#             return user
+#     return None
 
 def create_single_csv_node(author, tweet):
     new_user = user_node(author, None, None)
@@ -163,13 +166,19 @@ def create_single_csv_node(author, tweet):
     return new_user
 
 def create_retweet_relations(users):
-    for user in users.values():
+    dict_author = {user.author: user for user in users.values()}
+    print("creating retweet relationship")
+    for user in tqdm(users.values()):
         if user.num_retweets > 0: 
             for retweet in user.my_retweets:
                 #Get name of original author 
                 sp_tweet = ((retweet.content.replace('b\'','').replace('b\"','')).strip('\'').strip('\"')).split()
                 author = sp_tweet[1]
-                author_node = find_node_csv(author)
+                if author in dict_author:
+                    author_node = dict_author[author]
+                    # print(author_node)
+                else:
+                    author_node = None
                 
 
                 if author_node == None:
@@ -191,14 +200,20 @@ def create_retweet_relations(users):
 
                     graph.create(user_node_in_graph)
                     userB = node_exists_in_graph("User", author_node.author)
-                print("creating retweet relationship")
+                # print("creating retweet relationship")
                 dt = retweet.dt.strftime("%F")
                 time = retweet.dt.strftime("%s")
-                userA_retweets_userB = Relationship(userA, "RETWEETED", userB, timestamp=time, date=dt)
-                graph.create(userA_retweets_userB)
+                try:
+                    if len(graph.run("MATCH (n:User)-[r:RETWEETED]-(m:User) WHERE n.author={a} AND m.author={b} RETURN n, m", a=user.author,b=author_node.author).data()) ==0:
+                        userA_retweets_userB = Relationship(userA, "RETWEETED", userB, timestamp=time, date=dt)
+                        graph.create(userA_retweets_userB)
+                except Exception as e:
+                    print(str(e))
+                    continue
 
 def create_reply_relations(users):
-    for user in users.values():
+    print("creating reply relationship")
+    for user in tqdm(users.values()):
         for reply in user.my_replies:
             replied_to_user = ((reply.content.replace('b\'','').replace('b\"','')).strip('\'').strip('\"')).split(" ")[0]
             #want to replace those with a period
@@ -222,14 +237,16 @@ def create_reply_relations(users):
                 new_tweet = tweet(None, None, None, None)
                 create_single_csv_node(replied_to_user,new_tweet)          
             
-            print("creating reply relationship")
+            # print("creating reply relationship")
             dt = reply.dt.strftime("%F")
             time = reply.dt.strftime("%s")
-            userA_replied_to_userB = Relationship(node_exists_in_graph('User', user.author), "REPLIED_TO", node_exists_in_graph('User', replied_to_user), timestamp=time, date=dt)
-            graph.create(userA_replied_to_userB)
+            if len(graph.run("MATCH (n:User)-[r:REPLIED_TO]-(m:User) WHERE n.author={a} AND m.author={b} RETURN n, m", a=user.author,b=replied_to_user).data()) == 0:
+                userA_replied_to_userB = Relationship(node_exists_in_graph('User', user.author), "REPLIED_TO", node_exists_in_graph('User', replied_to_user), timestamp=time, date=dt)
+                graph.create(userA_replied_to_userB)
 
 def create_mention_relations(users):
-    for user in users.values():
+    print("creating mention relationship")
+    for user in tqdm(users.values()):
         for tweet_ in user.my_potential_mentions:
             mentions = ['@'+re.sub(r'[^\w\s]','',i) for i in ((tweet_.content.replace('b\'','').replace('b\"','')).strip('\'').strip('\"')).split(" ") if "@" in i][1:]
             # print(mentions)
@@ -247,7 +264,7 @@ def create_mention_relations(users):
 
                 if node_exists_in_graph('User', mention) != None:
                     old_node = node_exists_in_graph('User', mention)
-                    print(old_node)
+                    # print(old_node)
                     old_node["mention_count"] += 1
                     graph.push(old_node)
                 else:
@@ -265,11 +282,16 @@ def create_mention_relations(users):
                 
 
 
-                print("creating mention relationship")
-                dt = mention.dt.strftime("%F")
-                time = mention.dt.strftime("%s")
-                userA_mentioned_userB = Relationship(node_exists_in_graph('User', user.author) , "MENTIONED", node_exists_in_graph('User', mention), timestamp=time, date=dt)
-                graph.create(userA_mentioned_userB)
+                # print("creating mention relationship")
+                dt = tweet_.dt.strftime("%F")
+                time = tweet_.dt.strftime("%s")
+                try:
+                    if len(graph.run("MATCH (n:User)-[r:MENTIONED]-(m:User) WHERE n.author={a} AND m.author={b} RETURN n, m", a=user.author,b=mention).data()) == 0:
+                        userA_mentioned_userB = Relationship(node_exists_in_graph('User', user.author) , "MENTIONED", node_exists_in_graph('User', mention), timestamp=time, date=dt)
+                        graph.create(userA_mentioned_userB)
+                except Exception as e:
+                    print(str(e))
+                    continue
 
 
 def get_sentiment(fields, row):
@@ -293,11 +315,11 @@ def print_tweets(tweets):
         print("    Tweet: ", tweet.content)
         print("    Sentiment: ", tweet.sentiment)
 
-users = create_user_nodes()
-create_user_node_in_graph(users)
-create_reply_relations(users)
-create_retweet_relations(users)
-create_mention_relations(users)
+# users = create_user_nodes()
+# # create_user_node_in_graph(users)
+# create_reply_relations(users)
+# create_retweet_relations(users)
+
 
 
 
